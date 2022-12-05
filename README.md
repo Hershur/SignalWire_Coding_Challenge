@@ -1,4 +1,4 @@
-# Coding Challenge
+# SignalWire_Coding_Challenge
 
 
 ## Install
@@ -31,4 +31,3 @@ Make a POST request to http://localhost:3000/api/v1/user/tickets like:
         "tags": ["tags1","tags2","tags3","tags4"]
     } 
 ```  
-# SignalWire_Coding_Challenge

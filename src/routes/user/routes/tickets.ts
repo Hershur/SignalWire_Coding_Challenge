@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import axios from 'axios';
-import { getHighestTagCount, insertTags, insertTickets } from '../../../database/data/user-tickets';
+import { insertTags, insertTickets } from '../../../database/data/user-tickets';
 import { IFieldValidator, IUserDetails } from '../../../models';
 import httpHelpers from '../../../utils/httpHelpers';
 import { validateUserDetails } from '../../../utils/validators';
@@ -52,13 +52,9 @@ router.post('/tickets', async (req, res) => {
 
 
   if(ticketsResponse.success && tagsResponse.success){
-    const highestCount = await getHighestTagCount();
-
-    if(highestCount.success){
-      const payload = { tagName: highestCount.response?.tag, count: highestCount.response?.count };
-      await axios.post('https://webhook.site/67baa13a-50e9-46cc-8cb0-e19d2d61259d', payload);
-    }
-
+    const payload = { tagName: tagsResponse.response?.tag, count: tagsResponse.response?.count };
+    await axios.post('https://webhook.site/67baa13a-50e9-46cc-8cb0-e19d2d61259d', payload);
+    
     return httpHelpers.respondWith200OkJson(res, { success: true, message: 'Inserted successfully', data: ticketsResponse.response });
   } else {
     return httpHelpers.respondWith400BadRequest(res, { success: false, message: 'An error occured', errors: ticketsResponse.error || tagsResponse.error });

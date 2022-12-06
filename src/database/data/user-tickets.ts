@@ -21,7 +21,18 @@ export const insertTickets = async (values: string[]) => {
 
 export const insertTags = async (values: string[]) => {
     try {
-        const response = await query(`INSERT INTO tags (user_id, tag) VALUES ( $1, UNNEST($2::text[]) )`, values);
+        const response = await query(`
+            WITH insert_tags_data AS (
+                INSERT INTO tags (user_id, tag)
+                VALUES ( $1, UNNEST($2::text[]) ) 
+                RETURNING * 
+            )
+            
+            SELECT tag, (COUNT(tag) + (SELECT COUNT(tag) FROM insert_tags_data)) AS count 
+            FROM tags GROUP BY tag ORDER BY count DESC LIMIT 1`, 
+            values
+        );
+
         return { success: true, response: response.rows?.[0] };
     } catch (error) {
         console.log((error as any).stack);
@@ -29,13 +40,3 @@ export const insertTags = async (values: string[]) => {
     }
 };
 
-
-export const getHighestTagCount = async () => {
-    try {
-        const response = await query(`SELECT tag, count(tag) as count FROM tags GROUP BY tag ORDER BY count DESC LIMIT 1`);
-        return { success: true, response: response.rows?.[0] };
-    } catch (error) {
-        console.log((error as any).stack);
-        return { success: false, error };
-    }
-};

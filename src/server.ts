@@ -7,7 +7,7 @@ import express, {
 import { router as userRoutes } from './routes/user';
 
 
-const app: express.Application = express();
+export const app: express.Application = express();
 const port = 3000;
 
 app.use(express.json());

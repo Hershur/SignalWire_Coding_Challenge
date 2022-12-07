@@ -18,6 +18,14 @@ Run npm start:dev to run the application locally. Server starts at http://localh
 npm run start:dev
 ```
 
+## Test
+
+Run npm test to run tests
+
+```bash
+npm run test
+```
+
 ## Routes
 
 ### Tickets route

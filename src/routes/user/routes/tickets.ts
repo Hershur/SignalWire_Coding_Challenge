@@ -38,7 +38,7 @@ router.post('/tickets', async (req, res) => {
 
   const user_id = req.body.user_id;
   const title = req.body.title;
-  const tags: string[] = req.body.tags.map((t: string) => t?.toLowerCase());
+  const tags: string[] = req.body.tags && req.body.tags.map((t: string) => t?.toLowerCase());
 
   // insert tickets
   const valuesTickets = [user_id, title];
@@ -46,18 +46,22 @@ router.post('/tickets', async (req, res) => {
 
   const [ticketsResponse, tagsResponse] = await Promise.all([
     await insertTickets(valuesTickets),
-    await insertTags(valuesTags)
+    tags?.length > 0 && await insertTags(valuesTags)
   ]);
 
 
 
-  if(ticketsResponse.success && tagsResponse.success){
-    const payload = { tagName: tagsResponse.response?.tag, count: tagsResponse.response?.count };
-    await axios.post('https://webhook.site/67baa13a-50e9-46cc-8cb0-e19d2d61259d', payload);
+  if(ticketsResponse.success){
+
+    // post to webhook url if tags are present
+    if(tagsResponse && tagsResponse.success){
+      const payload = { tagName: tagsResponse.response?.tag, count: tagsResponse.response?.count };
+      await axios.post('https://webhook.site/67baa13a-50e9-46cc-8cb0-e19d2d61259d', payload);
+    }
     
     return httpHelpers.respondWith200OkJson(res, { success: true, message: 'Inserted successfully', data: ticketsResponse.response });
   } else {
-    return httpHelpers.respondWith400BadRequest(res, { success: false, message: 'An error occured', errors: ticketsResponse.error || tagsResponse.error });
+    return httpHelpers.respondWith400BadRequest(res, { success: false, message: 'An error occured', errors: ticketsResponse.error || (tagsResponse && tagsResponse.error) });
   }
   
     
